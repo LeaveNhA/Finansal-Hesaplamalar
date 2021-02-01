@@ -111,6 +111,7 @@ function hesapla_($parametreler, $girdiler)
 
 function hesapla($parametreler, $girdiler)
 {
+    # Brütten Nete!
     return \Functional\compose(
     # Yıllık Brüt Ücret:
         applyer([
@@ -360,9 +361,60 @@ function hesapla($parametreler, $girdiler)
                 ($cikti);
             }
         ]),
-    # TODO: İşsizlik İş veren:
-    # TODO: Toplam Maaliyet:
-    # TODO: Alan Toplamları:
+    # İşsizlik İş veren:
+        applyer([
+            'çıktı' => function ($cikti, $veriler) {
+                return \Functional\compose(
+                    arrayMapWrapper(
+                        \Functional\compose(
+                            lookUp('brütMaaş'),
+                            \Functional\curry_n(2, 'min')
+                            ($veriler['girdiler']['SGKTavan']),
+                            function($a) use ($veriler) {
+                                return $veriler['parametreler']['işsizlikİşVerenPrimiOranı']
+                                    / 100 * $a;
+                            },
+                            wrapIt('işsizlikİşVeren')
+                        )
+                    ),
+                    \Functional\curry_n(3, 'array_map')
+                    ('array_merge')
+                    ($cikti),
+                )
+                ($cikti);
+            }
+        ]),
+    # Toplam Maaliyet:
+        applyer([
+            'çıktı' => function ($cikti, $veriler) {
+                return \Functional\compose(
+                    arrayMapWrapper(
+                        \Functional\compose(
+                            function($v){
+                                return \Functional\select_keys($v, ['brütMaaş', 'SSKİşVeren', 'işsizlikİşVeren']);
+                            },
+                            arrayReduceWrapper(function($a, $b){ return $a + $b; }, 0),
+                            wrapIt('toplamMaliyet')
+                        )
+                    ),
+                    \Functional\curry_n(3, 'array_map')
+                    ('array_merge')
+                    ($cikti),
+                )
+                ($cikti);
+            }
+        ]),
+    # Alan Toplamları:
+        applyer([
+            'çıktı' => function ($cikti, $veriler) {
+                return \Functional\compose(
+                    arrayReduceWrapper(mergeWith(function($a, $b){ return $a + $b; }), []),
+                    wrapIt(0),
+                    \Functional\curry_n(2, 'array_merge')($cikti),
+                )
+                ($cikti);
+            }
+        ])
     )
     (['parametreler' => $parametreler,
         'girdiler' => $girdiler,
@@ -385,7 +437,8 @@ $parametreler = [
     'SSKİşVerenPrimiOranı' => 15.5,
     'SSKİşçiPrimiOranı' => 0.14,
     'SSKİşsizlikİşçiPrimi' => 0.01,
-    'işsizlikİşçiPrimi' => 0.01
+    'işsizlikİşçiPrimi' => 0.01,
+    'işsizlikİşVerenPrimiOranı' => 2
 ];
 $girdilerIhbar = [
     'adSoyad' => 'Seçkin KÜKRER',
@@ -406,4 +459,5 @@ var_dump(
 # applyer(['a' => 'identity', 'b' => function(){return 1;}])(['a' => 1])
 # agiHesapla($parametreler)($agiGirdiler)
 # agiCocukSayisi($parametreler)($agiGirdiler)
+# arrayReduceWrapper(mergeWith(function($a, $b){ return $a + $b; }), [])([['a' => 1], ['a' => 1, 'b' => 2]])
 );

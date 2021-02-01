@@ -34,6 +34,17 @@ function wrapIt($key){
     };
 }
 
+function mergeWith($fn){
+    return function($arr1, $arr2) use ($fn) {
+        $result = [];
+
+        foreach ($arr1 as $k => $v)
+            $result[$k] = $fn($v, $arr2[$k]);
+
+        return array_merge($arr1, $arr2, $result);
+    };
+}
+
 function ifFn($trueFn, $falseFn, $condition)
 {
     if ($condition === true) {
