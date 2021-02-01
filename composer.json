@@ -1,0 +1,13 @@
+{
+    "name": "org.kukrer.sftw/inka",
+    "type": "library",
+    "authors": [
+        {
+            "name": "LeaveNhA",
+            "email": "seckin.kukrer@hotmail.com"
+        }
+    ],
+    "require": {
+        "lstrojny/functional-php": "^1.15"
+    }
+}

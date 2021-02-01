@@ -1,0 +1,300 @@
+<?php
+# Essential functions for FP.
+
+function identity($a)
+{
+    return $a;
+}
+
+function wrapItWith($key){
+    return function($fn) use ($key) {
+        return function($value) use ($key, $fn) {
+            $value[$key] = $fn($value);
+
+            return $value;
+        };
+    };
+}
+
+function multiplyWith($a){
+    return function($b) use ($a) {
+        return $a * $b;
+    };
+}
+
+function lookUp($key){
+    return function($value) use($key){
+        return $value[$key];
+    };
+}
+
+function wrapIt($key){
+    return function($value) use($key){
+        return [$key => $value];
+    };
+}
+
+function ifFn($trueFn, $falseFn, $condition)
+{
+    if ($condition === true) {
+        return $trueFn();
+    } else {
+        return $falseFn();
+    }
+}
+
+function nullWrapper($fn)
+{
+    return function ($arg) use ($fn) {
+        return is_null($arg) ? null : $fn($arg);
+    };
+}
+
+function arrayMapWrapper($fn)
+{
+    return function ($data) use ($fn) {
+        return array_map($fn, $data);
+    };
+}
+
+function arrayReduceWrapper($fn, $init = null)
+{
+    return function ($data) use ($init, $fn) {
+        return $init === null ? array_reduce($data, $fn) : array_reduce($data, $fn, $init);
+    };
+}
+
+function arrayFilterWrapper($fn)
+{
+    return function ($data) use ($fn) {
+        return array_filter($data, $fn);
+    };
+}
+
+function arrayMerger()
+{
+    return function ($arr) {
+        return array_reduce(
+            $arr,
+            function ($acc, $arr) {
+                return array_merge($acc, $arr);
+            },
+            []
+        );
+    };
+}
+
+function imageToBase64Image()
+{
+    return \Functional\compose(
+        'file_get_contents',
+        'base64_encode'
+    );
+}
+
+function applyer($applyMap)
+{
+    return function ($data) use ($applyMap) {
+        $arrayData = (array)$data;
+
+        $result = array_map(
+            function ($key, $value) use ($applyMap, $data) {
+                if (!isset($value) || is_null($value))
+                    return [$key => null];
+
+                if (array_key_exists($key, $applyMap)) {
+                    $fn = $applyMap[$key];
+                } else {
+                    $fn = function ($a) {
+                        return $a;
+                    };
+                }
+
+                return [$key => $fn($value, $data)];
+            },
+            array_keys($arrayData),
+            $arrayData
+        );
+
+        return array_reduce($result,
+            function ($acc, $v) {
+                return array_merge($acc, $v);
+            }, []);
+    };
+}
+
+# Hesaplamalar:
+
+function toDateTime($a)
+{
+    return new \DateTime($a);
+}
+
+function calistigiGunHesapla($girdi)
+{
+    $girdi['çalıştığıGünSayısı'] = $girdi['iştenÇıkış']->diff($girdi['işeGiriş'])->format("%a");
+
+    return $girdi;
+}
+
+function karsilastirma($deger)
+{
+    return function ($kisitFn) use ($deger) {
+        return $kisitFn($deger);
+    };
+}
+
+function vergiDilimiHesaplariDonusumleri($degerYapisi, $kisit)
+{
+    $deger = $degerYapisi['deger'];
+    $kisitDegeri = $kisit[0];
+    $kisitOrani = $kisit[1];
+
+    $kisitOranSonucu = $deger <= 0 ? 0 : $deger - $kisitDegeri >= 0 ? $kisitDegeri : $deger;
+    $yeniDeger = $deger <= 0 ? 0 : $deger >= $kisitDegeri ? ($deger - $kisitDegeri) : 0;
+    $sonuc = array_merge($kisit, [$kisitOranSonucu / 100 * $kisitOrani]);
+
+    # var_dump([$deger, $kisitDegeri, $yeniDeger, $kisitOranSonucu, $sonuc]);
+
+    $degerYapisi['deger'] = $yeniDeger;
+    $degerYapisi['degerler'] = array_merge($degerYapisi['degerler'], [$sonuc]);
+
+    return $degerYapisi;
+}
+
+function karsilastirmaFonksiyonuDonusumleri($kisit)
+{
+    return ([
+        '<' => function ($a) use ($kisit) {
+            return function ($b) use ($kisit, $a) {
+                return $a < $b ? $kisit : false;
+            };
+        },
+        '>' => function ($a) use ($kisit) {
+            return function ($b) use ($kisit, $a) {
+                return $a > $b ? $kisit : false;
+            };
+        },
+        '=' => function ($a) use ($kisit) {
+            return function ($b) use ($kisit, $a) {
+                return $a == $b ? $kisit : false;
+            };
+        }
+    ])[$kisit[0]]($kisit[1]);
+}
+
+function ihbarSuresiHesaplama($parametreler)
+{
+    return function ($girdiler) use ($parametreler) {
+        $girdiler['ihbarSüresiGünü'] = \Functional\compose(
+            arrayMapWrapper('karsilastirmaFonksiyonuDonusumleri'),
+            arrayMapWrapper(
+                function ($f) use ($girdiler) {
+                    return $f($girdiler['çalıştığıGünSayısı']);
+                }
+            ),
+            arrayFilterWrapper('identity'),
+            'array_values',
+            function ($array) {
+                return $array[0];
+            },
+            function ($array) {
+                return $array[2];
+            },
+        )
+        ($parametreler['ihbarSüresiKısıtları']);
+
+        return $girdiler;
+    };
+}
+
+function gelirVergisiDilimleri($parametreler)
+{
+    $kisitlar = $parametreler['vergiDilimiKısıtları'];
+
+    return function ($deger) use ($kisitlar) {
+        return \Functional\compose(
+            function ($v) {
+                return $v['degerler'];
+            },
+            arrayMapWrapper(
+                function ($v) {
+                    return $v[2];
+                }
+            ),
+            function ($v) {
+                return array_reduce($v, function ($a, $b) {
+                    return $a + $b;
+                });
+            }
+        )
+        (array_reduce($kisitlar, 'vergiDilimiHesaplariDonusumleri',
+            ['deger' => $deger, 'degerler' => []]));
+    };
+}
+
+function agiEsDurumu($parametreler)
+{
+    $calismayanEsOrani = $parametreler['çalışmayanEşOranı'] = 10;
+
+    return function ($m) use ($calismayanEsOrani) {
+        return $m['medeniDurum'] == 'bekar' ? 0 :
+            ($m['eşininÇalışmaDurumu'] == 'çalışmıyor' ? $calismayanEsOrani : 0);
+    };
+}
+
+function agiCocukSayisi($parametreler)
+{
+    $ilkIkiCocukOrani = $parametreler['ilkİkiÇocukOranı'];
+    $ucuncuCocukOrani = $parametreler['üçüncüÇocukOranı'];
+    $dortVeSonrasiOrani = $parametreler['dördüncüÇocukVeSonrasıOranı'];
+
+    return function ($veriler) use($ilkIkiCocukOrani, $ucuncuCocukOrani, $dortVeSonrasiOrani) {
+        $m = $veriler['çocukSayısı'];
+
+        switch ($m){
+            case 1:
+                return $ilkIkiCocukOrani;
+            case 2:
+                return $ilkIkiCocukOrani * 2;
+            case 3:
+                return $ilkIkiCocukOrani * 2 + $ucuncuCocukOrani;
+            default:
+                return ($m > 3) ?
+                    $ilkIkiCocukOrani * 2 + $ucuncuCocukOrani + ($m * $dortVeSonrasiOrani)
+                    : 0;
+        }
+    };
+}
+
+function agiHesapla($parametreler)
+{
+    return function ($agiVerileri) use ($parametreler) {
+        return \Functional\compose(
+            # Kendi için:
+            function ($veriler){
+                $veriler['sonuç'] = 50;
+
+                return $veriler;
+            },
+            # Eş çalışma durumu:
+            function($veriler) use($parametreler){
+                $veriler['sonuç'] += agiEsDurumu($parametreler)($veriler);
+
+                return $veriler;
+            },
+            # Çocuklar için:
+            function($veriler) use($parametreler){
+                $veriler['sonuç'] += agiCocukSayisi($parametreler)($veriler);
+
+                return $veriler;
+            },
+            applyer([
+                'sonuç' => function($n){
+                    return min($n, 85);
+                }
+            ])
+        )
+        ($agiVerileri);
+    };
+}
