@@ -2,7 +2,7 @@
 
 # TODO: ortak hesaplamaları ekle!
 
-function hesapla($parametreler, $girdiler)
+function kidemTazminatiHesapla($parametreler, $girdiler)
 {
     $toDateTime = function ($a) {
         return new \DateTime($a);
@@ -59,26 +59,3 @@ function hesapla($parametreler, $girdiler)
     (['parametreler' => $parametreler,
         'girdiler' => $girdiler]);
 }
-
-/*
- * Test değerleri:
- */
-
-/*
-$parametreler = [
-    'damgaVergisiKatsayısı' => 232.86,
-    'kıdemTazminatıTavan' => 7638.69,
-    'damgaVergisiKatkısı' => 0.00759
-];
-$girdiler = [
-    'adSoyad' => 'Seçkin KÜKRER',
-    'işeGiriş' => "2016-01-01",
-    'iştenÇıkış' => "2020-01-01",
-    'aylıkBrütÜcret' => 100000,
-    'ekÖdemeÜcret' => 0
-];
-
-var_dump(
-    hesapla($parametreler, $girdiler)
-);
-*/
