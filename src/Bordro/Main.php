@@ -84,7 +84,7 @@ $agiGirdiler = ['medeniDurum' => 'evli', 'eşininÇalışmaDurumu' => 'çalışm
 
 var_dump(
 # hesapla(BRUTTEN_NETE, $parametreler, array_merge(['aylıkBrütÜcret' => 4000], $agiGirdiler))
- hesapla(IHBAR_TAZMINATI, $parametreler, $girdilerIhbar)
+# hesapla(IHBAR_TAZMINATI, $parametreler, $girdilerIhbar)
 # hesapla(KIDEM_TAZMINATI, $parametreler, $girdilerKidem)
 # -------------------------------------------------------------------------------------------------
 # parçalı hesaplamalar:
@@ -96,5 +96,5 @@ var_dump(
 # agiCocukSayisi($parametreler)($agiGirdiler)
 # arrayReduceWrapper(mergeWith(function($a, $b){ return $a + $b; }), [])([['a' => 1], ['a' => 1, 'b' => 2]])
 # arrayMapWrapper(vergiDilimiIslemi(56000))($parametreler['vergiDilimiKısıtları'])
-# gelirVergisiDilimleri($parametreler)(56000)
+ gelirVergisiDilimiBul($parametreler)(25500) / 100 * 8500
 );
