@@ -219,31 +219,6 @@ function ihbarSuresiHesaplama($parametreler)
     };
 }
 
-function gelirVergisiDilimleri($parametreler)
-{
-    $kisitlar = $parametreler['vergiDilimiKısıtları'];
-
-    return function ($deger) use ($kisitlar) {
-        return \Functional\compose(
-            function ($v) {
-                return $v['degerler'];
-            },
-            arrayMapWrapper(
-                function ($v) {
-                    return $v[2];
-                }
-            ),
-            function ($v) {
-                return array_reduce($v, function ($a, $b) {
-                    return $a + $b;
-                });
-            }
-        )
-        (array_reduce($kisitlar, 'vergiDilimiHesaplariDonusumleri',
-            ['deger' => $deger, 'degerler' => []]));
-    };
-}
-
 function agiEsDurumu($parametreler)
 {
     $calismayanEsOrani = $parametreler['çalışmayanEşOranı'] = 10;
@@ -307,5 +282,31 @@ function agiHesapla($parametreler)
             ])
         )
         ($agiVerileri);
+    };
+}
+
+function vergiDilimiIslemi($deger){
+    return function($vergiDilimi) use ($deger) {
+        list($baslangicKisit, $bitisKisit, $oran) = $vergiDilimi;
+        return array_merge(
+            $vergiDilimi,
+            [
+                max(min($deger - $baslangicKisit, ($bitisKisit - $baslangicKisit)), 0) / 100 * $oran
+            ]
+        );
+    };
+}
+
+function gelirVergisiDilimleri($parametreler)
+{
+    $kisitlar = $parametreler['vergiDilimiKısıtları'];
+
+    return function ($deger) use ($kisitlar) {
+        return \Functional\compose(
+            arrayMapWrapper(vergiDilimiIslemi($deger)),
+            arrayMapWrapper('\Functional\last'),
+            arrayReduceWrapper(function($a, $b){ return $a + $b; })
+        )
+        ($kisitlar);
     };
 }
