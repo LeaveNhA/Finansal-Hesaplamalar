@@ -310,3 +310,23 @@ function gelirVergisiDilimleri($parametreler)
         ($kisitlar);
     };
 }
+
+function gelirVergisiDilimiBul($parametreler)
+{
+    $kisitlar = $parametreler['vergiDilimiKısıtları'];
+
+    return function ($deger) use ($kisitlar) {
+        return \Functional\compose(
+            arrayMapWrapper(vergiDilimiIslemi($deger)),
+            arrayFilterWrapper(
+                \Functional\compose(
+                    '\Functional\last',
+                    'identity'
+                )
+            ),
+            '\Functional\last',
+            lookUp(2)
+        )
+        ($kisitlar);
+    };
+}
