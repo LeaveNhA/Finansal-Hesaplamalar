@@ -15,8 +15,9 @@ const KIDEM_TAZMINATI = 'kıdem';
 const IHBAR_TAZMINATI = 'ihbar';
 const BRUTTEN_NETE = 'brütnet';
 
-function hesapla($fn, $parametreler, $girdiler){
-    switch ($fn){
+function hesapla($fn, $parametreler, $girdiler)
+{
+    switch ($fn) {
         case KIDEM_TAZMINATI:
             $fn = 'kidemTazminatiHesapla';
             break;
@@ -36,9 +37,14 @@ $parametreler = [
     'damgaVergisiKatsayısı' => 232.86,
     'kıdemTazminatıTavan' => 7638.69,
     'damgaVergisiKatkısı' => 0.00759,
-    #------------------------------------oranlar 10 ile çarpılmıştır---------------------------------------
+    #------------------------------------oranlar tam sayı olarak yazılmıştır-------------------------------
     'ihbarSüresiKısıtları' => [['>', 180, 14], ['>', 540, 28], ['>', 1080, 42], ['<', 1080, 56]],
-    'vergiDilimiKısıtları' => [[24000, 15], [53000, 20], [190000, 27], [650000, 35], [99999999999999, 40]],
+    'vergiDilimiKısıtları' =>
+        [[0, 24000, 15],
+            [24000, 53000, 20],
+            [53000, 190000, 27],
+            [190000, 650000, 35],
+            [650000, 99999999999999, 40]],
     #------------------------------------------------------------------------------------------------------
     'ilkİkiÇocukOranı' => 7.5,
     'üçüncüÇocukOranı' => 10,
@@ -77,9 +83,9 @@ $girdilerKidem = [
 $agiGirdiler = ['medeniDurum' => 'evli', 'eşininÇalışmaDurumu' => 'çalışmıyor', 'çocukSayısı' => 4];
 
 var_dump(
-    hesapla(BRUTTEN_NETE, $parametreler, array_merge(['aylıkBrütÜcret' => 4000], $agiGirdiler))
-    # hesapla(IHBAR_TAZMINATI, $parametreler, $girdilerIhbar)
-    # hesapla(KIDEM_TAZMINATI, $parametreler, $girdilerKidem)
+# hesapla(BRUTTEN_NETE, $parametreler, array_merge(['aylıkBrütÜcret' => 4000], $agiGirdiler))
+ hesapla(IHBAR_TAZMINATI, $parametreler, $girdilerIhbar)
+# hesapla(KIDEM_TAZMINATI, $parametreler, $girdilerKidem)
 # -------------------------------------------------------------------------------------------------
 # parçalı hesaplamalar:
 # ihbarSuresiHesaplama($parametreler)($girdiler)
@@ -89,4 +95,6 @@ var_dump(
 # agiHesapla($parametreler)($agiGirdiler)
 # agiCocukSayisi($parametreler)($agiGirdiler)
 # arrayReduceWrapper(mergeWith(function($a, $b){ return $a + $b; }), [])([['a' => 1], ['a' => 1, 'b' => 2]])
+# arrayMapWrapper(vergiDilimiIslemi(56000))($parametreler['vergiDilimiKısıtları'])
+# gelirVergisiDilimleri($parametreler)(56000)
 );
