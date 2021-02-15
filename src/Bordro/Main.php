@@ -83,7 +83,7 @@ $girdilerKidem = [
 $agiGirdiler = ['medeniDurum' => 'evli', 'eşininÇalışmaDurumu' => 'çalışmıyor', 'çocukSayısı' => 4];
 
 var_dump(
-# hesapla(BRUTTEN_NETE, $parametreler, array_merge(['aylıkBrütÜcret' => 4000], $agiGirdiler))
+ hesapla(BRUTTEN_NETE, $parametreler, array_merge(['aylıkBrütÜcret' => 10000], $agiGirdiler))
 # hesapla(IHBAR_TAZMINATI, $parametreler, $girdilerIhbar)
 # hesapla(KIDEM_TAZMINATI, $parametreler, $girdilerKidem)
 # -------------------------------------------------------------------------------------------------
@@ -96,5 +96,8 @@ var_dump(
 # agiCocukSayisi($parametreler)($agiGirdiler)
 # arrayReduceWrapper(mergeWith(function($a, $b){ return $a + $b; }), [])([['a' => 1], ['a' => 1, 'b' => 2]])
 # arrayMapWrapper(vergiDilimiIslemi(56000))($parametreler['vergiDilimiKısıtları'])
- gelirVergisiDilimiBul($parametreler)(25500) / 100 * 8500
+# gelirVergisiDilimleri($parametreler)(34000) // TODO: önceki ayları düşerek takip edilecek!
+# gelirVergisiDilimiBul($parametreler)(25500) / 100 * 10000
+# arrayMapWrapper(gelirVergisiDilimleri($parametreler))([8500, 17000, 25500, 34000, 42500, 51000, 59500, 68000, 76500, 85000, 93500, 102000])
+# \Functional\select_keys([1,2,3,4,5,6,7], range(0,8))
 );

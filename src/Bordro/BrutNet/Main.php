@@ -130,10 +130,10 @@ function bruttenNeteHesapla($parametreler, $girdiler)
         # Gelir Vergisi: (hazır)
         applyer([
             'çıktı' => function ($cikti, $veriler) {
-                return \Functional\compose(
+                $vergiler_ = \Functional\compose(
                     arrayMapWrapper(
                         \Functional\compose(
-                            lookUp('gelirVergisiMatrahı'),
+                            lookUp('kümülatifGelirVergisi'),
                             gelirVergisiDilimleri($veriler['parametreler']),
                             wrapIt('gelirVergisi')
                         )
@@ -143,10 +143,32 @@ function bruttenNeteHesapla($parametreler, $girdiler)
                     ($cikti),
                 )
                 ($cikti);
+
+                return \Functional\compose(
+                    arrayMapWrapper(function($rangeEnd) use ($vergiler_) {
+                        return \Functional\select_keys($vergiler_, range(max(0, $rangeEnd - 1), $rangeEnd));
+                    }),
+                    arrayMapWrapper(
+                        arrayMapWrapper(lookUp('gelirVergisi'))
+                    ),
+                    arrayMapWrapper(
+                        'array_reverse'
+                    ),
+                    arrayMapWrapper(
+                        arrayReduceWrapper(function($a, $b){
+                            return $b - $a;
+                        }, 0)
+                    ),
+                    arrayMapWrapper('abs'),
+                    arrayMapWrapper(wrapIt('gelirVergisi')),
+                    \Functional\curry_n(3, 'array_map')
+                    ('array_merge')
+                    ($cikti),
+                )(range(0, 11));
             }
         ]),
         # AGİ Oran:
-        applyer([
+/*        applyer([
             'girdiler' =>
                 wrapItWith('agiOranı')
                 (\Functional\compose(
@@ -305,7 +327,7 @@ function bruttenNeteHesapla($parametreler, $girdiler)
                 )
                 ($cikti);
             }
-        ])
+        ])*/
     )
     (['parametreler' => $parametreler,
         'girdiler' => $girdiler,
