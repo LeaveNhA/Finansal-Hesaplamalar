@@ -1,4 +1,7 @@
 <?php
+namespace Bordro\Kidem;
+
+use Bordro\Alan;
 
 # TODO: ortak hesaplamaları ekle!
 

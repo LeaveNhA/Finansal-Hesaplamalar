@@ -1,4 +1,6 @@
 <?php
+namespace Bordro\Alan;
+
 # Essential functions for FP.
 
 function identity($a)

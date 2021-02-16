@@ -1,6 +1,15 @@
 {
     "name": "org.kukrer.sftw/inka",
     "type": "library",
+    "description": "Calculate some financials with some parameters.",
+    "keywords": ["Kıdem Tazminatı Hesaplama"],
+    "homepage": "",
+    "license": "MIT",
+    "config": {
+        "platform": {
+            "php": "^7.3"
+        }
+    },
     "authors": [
         {
             "name": "LeaveNhA",
@@ -8,6 +17,16 @@
         }
     ],
     "require": {
+        "php": "~7|~8",
         "lstrojny/functional-php": "^1.15"
+    },
+    "autoload": {
+        "psr-4": {"Bordro\\": "src/Bordro"},
+        "files": [
+            "src/Bordro/Main.php",
+            "src/Bordro/BrutNet/Main.php",
+            "src/Bordro/Ihbar/Main.php",
+            "src/Bordro/Kidem/Main.php"
+        ]
     }
 }

@@ -1,5 +1,9 @@
 <?php
 
+namespace Bordro\Ihbar;
+
+use Bordro\Alan;
+
 function ihbarTazminatiHesapla($parametreler, $girdiler)
 {
     # İhbar Tazminatı!

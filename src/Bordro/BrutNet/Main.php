@@ -1,5 +1,7 @@
 <?php
 
+namespace Bordro\BrutNet;
+
 function bruttenNeteHesapla($parametreler, $girdiler)
 {
     # Brütten Nete!
