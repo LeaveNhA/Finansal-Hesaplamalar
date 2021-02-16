@@ -168,7 +168,7 @@ function bruttenNeteHesapla($parametreler, $girdiler)
             }
         ]),
         # AGİ Oran:
-/*        applyer([
+        applyer([
             'girdiler' =>
                 wrapItWith('agiOranı')
                 (\Functional\compose(
@@ -327,7 +327,7 @@ function bruttenNeteHesapla($parametreler, $girdiler)
                 )
                 ($cikti);
             }
-        ])*/
+        ])
     )
     (['parametreler' => $parametreler,
         'girdiler' => $girdiler,
