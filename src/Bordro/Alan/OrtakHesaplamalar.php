@@ -24,6 +24,12 @@ function multiplyWith($a){
     };
 }
 
+function zip($arr_){
+    return function($arr2_) use ($arr_) {
+        return array_map('array_merge', $arr_, $arr2_);
+    };
+}
+
 function lookUp($key){
     return function($value) use($key){
         return $value[$key];
