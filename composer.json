@@ -7,9 +7,6 @@
     "homepage": "https://github.com/LeaveNhA/INOPSIS-Hesaplamalar",
     "license": "MIT",
     "config": {
-        "platform": {
-            "php": "^7.3"
-        }
     },
     "authors": [
         {
