@@ -4,7 +4,7 @@
     "type": "library",
     "description": "Calculate some financials with some parameters.",
     "keywords": ["Kıdem Tazminatı Hesaplama"],
-    "homepage": "",
+    "homepage": "https://github.com/LeaveNhA/INOPSIS-Hesaplamalar",
     "license": "MIT",
     "config": {
         "platform": {
