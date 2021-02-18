@@ -8,6 +8,13 @@ function identity($a)
     return $a;
 }
 
+function apply($fn){
+    return function($i) use ($fn) {
+        $fn($i);
+        return $i;
+    };
+}
+
 function wrapItWith($key){
     return function($fn) use ($key) {
         return function($value) use ($key, $fn) {
