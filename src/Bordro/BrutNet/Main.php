@@ -1,7 +1,11 @@
 <?php
 
+# TODO: Rakamsal kesinlik'ten kurtar, yüzlük bir oranda (virgülden sonra iki hane olacak şekilde rakamları kırp.)
+# TODO: Tüm fonksiyon çıktıları için hesaplamaları kontrol et.
+
 namespace Bordro\BrutNet;
 
+use function Bordro\Alan\apply;
 use function Bordro\Alan\applyer;
 use function Bordro\Alan\arrayMapWrapper;
 use function Bordro\Alan\arrayReduceWrapper;
@@ -158,7 +162,7 @@ function bruttenNeteHesapla($parametreler, $girdiler)
                 ($cikti);
 
                 return \Functional\compose(
-                    arrayMapWrapper(function($rangeEnd) use ($vergiler_) {
+                    arrayMapWrapper(function ($rangeEnd) use ($vergiler_) {
                         return \Functional\select_keys($vergiler_, range(max(0, $rangeEnd - 1), $rangeEnd));
                     }),
                     arrayMapWrapper(
@@ -168,7 +172,7 @@ function bruttenNeteHesapla($parametreler, $girdiler)
                         'array_reverse'
                     ),
                     arrayMapWrapper(
-                        arrayReduceWrapper(function($a, $b){
+                        arrayReduceWrapper(function ($a, $b) {
                             return $b - $a;
                         }, 0)
                     ),
@@ -196,9 +200,15 @@ function bruttenNeteHesapla($parametreler, $girdiler)
                     arrayMapWrapper(
                         \Functional\compose(
                             lookUp('brütMaaş'),
-                            function ($a) use ($veriler) {
-                                return $a / 100 * $veriler['girdiler']['agiOranı']
-                                    / 100 * $veriler['parametreler']['vergiDilimiKısıtları'][0][1];
+                            function ($brutUcret) use ($veriler) {
+                                return min(
+                                    $brutUcret
+                                    * ($veriler['girdiler']['agiOranı'] / 100)
+                                    * ($veriler['parametreler']['vergiDilimiKısıtları'][0][2] / 100),
+                                    $veriler['parametreler']['brütAsgariÜcret']
+                                    * ($veriler['girdiler']['agiOranı'] / 100)
+                                    * ($veriler['parametreler']['vergiDilimiKısıtları'][0][2] / 100),
+                                );
                             },
                             wrapIt('AGİ')
                         )
@@ -240,7 +250,7 @@ function bruttenNeteHesapla($parametreler, $girdiler)
                                 return \Functional\select_keys($a,
                                     ['brütMaaş', 'SSKİşçi', 'işsizlikİşçi', 'gelirVergisi', 'AGİ', 'damgaVergisi']);
                             },
-                            function ($v){
+                            function ($v) {
                                 return
                                     $v['brütMaaş']
                                     -
@@ -273,7 +283,7 @@ function bruttenNeteHesapla($parametreler, $girdiler)
                             lookUp('brütMaaş'),
                             \Functional\curry_n(2, 'min')
                             ($veriler['girdiler']['SGKTavan']),
-                            function($a) use ($veriler) {
+                            function ($a) use ($veriler) {
                                 return $veriler['parametreler']['SSKİşVerenPrimiOranı']
                                     / 100 * $a;
                             },
@@ -296,7 +306,7 @@ function bruttenNeteHesapla($parametreler, $girdiler)
                             lookUp('brütMaaş'),
                             \Functional\curry_n(2, 'min')
                             ($veriler['girdiler']['SGKTavan']),
-                            function($a) use ($veriler) {
+                            function ($a) use ($veriler) {
                                 return $veriler['parametreler']['işsizlikİşVerenPrimiOranı']
                                     / 100 * $a;
                             },
@@ -316,10 +326,12 @@ function bruttenNeteHesapla($parametreler, $girdiler)
                 return \Functional\compose(
                     arrayMapWrapper(
                         \Functional\compose(
-                            function($v){
+                            function ($v) {
                                 return \Functional\select_keys($v, ['brütMaaş', 'SSKİşVeren', 'işsizlikİşVeren']);
                             },
-                            arrayReduceWrapper(function($a, $b){ return $a + $b; }, 0),
+                            arrayReduceWrapper(function ($a, $b) {
+                                return $a + $b;
+                            }, 0),
                             wrapIt('toplamMaliyet')
                         )
                     ),
@@ -334,7 +346,9 @@ function bruttenNeteHesapla($parametreler, $girdiler)
         applyer([
             'çıktı' => function ($cikti, $veriler) {
                 return \Functional\compose(
-                    arrayReduceWrapper(mergeWith(function($a, $b){ return $a + $b; }), []),
+                    arrayReduceWrapper(mergeWith(function ($a, $b) {
+                        return $a + $b;
+                    }), []),
                     wrapIt(0),
                     \Functional\curry_n(2, 'array_merge')($cikti),
                 )

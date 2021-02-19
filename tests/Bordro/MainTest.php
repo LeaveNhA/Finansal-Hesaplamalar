@@ -26,6 +26,7 @@ final class MainTest extends TestCase
             'üçüncüÇocukOranı' => 10,
             'dördüncüÇocukVeSonrasıOranı' => 5,
             'asgariÜcret' => 2825.90,
+            'brütAsgariÜcret' => 3577,5,
             'SGKTavanOranı' => 7.5,
             'SSKİşVerenPrimiOranı' => 15.5,
             'SSKİşçiPrimiOranı' => 0.14,
@@ -57,7 +58,7 @@ final class MainTest extends TestCase
         ];
 
         $agiGirdiler = ['medeniDurum' => 'evli', 'eşininÇalışmaDurumu' => 'çalışmıyor', 'çocukSayısı' => 4];
-        $brutNetGirdi = array_merge(['aylıkBrütÜcret' => 10000], $agiGirdiler);
+        $brutNetGirdi = array_merge(['aylıkBrütÜcret' => 7133.77], $agiGirdiler);
 
         $this->assertTrue(hesapla('brütnet', $parametreler, $brutNetGirdi), 'Bordro Kıdem hesaplaması temel testi.');
     }
