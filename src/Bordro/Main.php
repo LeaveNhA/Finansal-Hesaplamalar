@@ -2,8 +2,6 @@
 
 namespace Bordro;
 
-require_once('vendor/autoload.php');
-
 use function Bordro\BrutNet\bruttenNeteHesapla;
 use function Bordro\Ihbar\ihbarTazminatiHesapla;
 use function Bordro\Kidem\kidemTazminatiHesapla;
