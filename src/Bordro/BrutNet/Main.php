@@ -354,6 +354,18 @@ function bruttenNeteHesapla($parametreler, $girdiler)
                 )
                 ($cikti);
             }
+        ]),
+        # Rakamsal Derinlik:
+        applyer([
+            'çıktı' => function($cikti){
+                array_walk_recursive($cikti,
+                    function(&$value){
+                        $value = round($value, 2);
+                    }
+                );
+
+                return $cikti;
+            }
         ])
     )
     (['parametreler' => $parametreler,
