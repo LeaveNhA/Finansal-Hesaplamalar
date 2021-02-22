@@ -2,7 +2,35 @@
 
 namespace Bordro\Ihbar;
 
-use Bordro\Alan;
+use function Bordro\Alan\apply;
+use function Bordro\Alan\applyer;
+use function Bordro\Alan\arrayMapWrapper;
+use function Bordro\Alan\arrayReduceWrapper;
+use function Bordro\Alan\arrayFilterWrapper;
+use function Bordro\Alan\ihbarSuresiHesaplama;
+use function Bordro\Alan\Is\agiCikti;
+use function Bordro\Alan\Is\agiOran;
+use function Bordro\Alan\Is\brutMaas;
+use function Bordro\Alan\Is\damgaVergisi;
+use function Bordro\Alan\Is\gelirVergisi;
+use function Bordro\Alan\Is\gelirVergisiDilimle;
+use function Bordro\Alan\Is\gelirVergisiMatrahi;
+use function Bordro\Alan\Is\issizlikIsci;
+use function Bordro\Alan\Is\issizlikIsveren;
+use function Bordro\Alan\Is\kumulatifGV;
+use function Bordro\Alan\Is\netUcret;
+use function Bordro\Alan\Is\sskIsci;
+use function Bordro\Alan\Is\sskIsveren;
+use function Bordro\Alan\Is\toplamMaliyet;
+use function Bordro\Alan\mergeWith;
+use function Bordro\Alan\toDateTime;
+use function Bordro\Alan\wrapIt;
+use function Bordro\Alan\wrapItWith;
+use function Bordro\Alan\agiHesapla;
+use function Bordro\Alan\lookUp;
+use function Bordro\Alan\multiplyWith;
+use function Bordro\Alan\zip;
+use function Bordro\Alan\gelirVergisiDilimleri;
 
 function ihbarTazminatiHesapla($parametreler, $girdiler)
 {
@@ -11,13 +39,13 @@ function ihbarTazminatiHesapla($parametreler, $girdiler)
     # Girdiyi yapılandır!
         applyer([
             'girdiler' => applyer([
-                'işeGiriş' => 'toDateTime',
-                'iştenÇıkış' => 'toDateTime'
+                'işeGiriş' => 'Bordro\Alan\toDateTime',
+                'iştenÇıkış' => 'Bordro\Alan\toDateTime'
             ])
         ]),
         # Çalıştığı Gün hespalama!
         applyer([
-            'girdiler' => 'calistigiGunHesapla'
+            'girdiler' => 'Bordro\Alan\calistigiGunHesapla'
         ]),
         # Çalıştığı gün +1
         applyer([

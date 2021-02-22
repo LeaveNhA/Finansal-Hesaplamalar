@@ -3,6 +3,8 @@ namespace Bordro\Alan;
 
 # Essential functions for FP.
 
+use function Functional\compose;
+
 function identity($a)
 {
     return $a;
@@ -213,13 +215,18 @@ function ihbarSuresiHesaplama($parametreler)
 {
     return function ($girdiler) use ($parametreler) {
         $girdiler['ihbarSüresiGünü'] = \Functional\compose(
-            arrayMapWrapper('karsilastirmaFonksiyonuDonusumleri'),
+            arrayMapWrapper(
+                function($a){
+                    return karsilastirmaFonksiyonuDonusumleri($a);
+                }
+            ),
             arrayMapWrapper(
                 function ($f) use ($girdiler) {
                     return $f($girdiler['çalıştığıGünSayısı']);
                 }
             ),
-            arrayFilterWrapper('identity'),
+            # identity placeholder for some strange PHP bug.
+            arrayFilterWrapper(function ($a){return $a;}),
             'array_values',
             function ($array) {
                 return $array[0];
