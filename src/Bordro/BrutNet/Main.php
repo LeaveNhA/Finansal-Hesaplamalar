@@ -10,6 +10,20 @@ use function Bordro\Alan\applyer;
 use function Bordro\Alan\arrayMapWrapper;
 use function Bordro\Alan\arrayReduceWrapper;
 use function Bordro\Alan\arrayFilterWrapper;
+use function Bordro\Alan\Is\agiCikti;
+use function Bordro\Alan\Is\agiOran;
+use function Bordro\Alan\Is\brutMaas;
+use function Bordro\Alan\Is\damgaVergisi;
+use function Bordro\Alan\Is\gelirVergisi;
+use function Bordro\Alan\Is\gelirVergisiDilimle;
+use function Bordro\Alan\Is\gelirVergisiMatrahi;
+use function Bordro\Alan\Is\issizlikIsci;
+use function Bordro\Alan\Is\issizlikIsveren;
+use function Bordro\Alan\Is\kumulatifGV;
+use function Bordro\Alan\Is\netUcret;
+use function Bordro\Alan\Is\sskIsci;
+use function Bordro\Alan\Is\sskIsveren;
+use function Bordro\Alan\Is\toplamMaliyet;
 use function Bordro\Alan\mergeWith;
 use function Bordro\Alan\wrapIt;
 use function Bordro\Alan\wrapItWith;
@@ -69,15 +83,7 @@ function bruttenNeteHesapla($parametreler, $girdiler)
         applyer([
             'çıktı' => function ($cikti, $veriler) {
                 return arrayMapWrapper(
-                    function ($ay) use ($veriler) {
-                        return \Functional\compose(
-                            multiplyWith($veriler['parametreler']['SSKİşçiPrimiOranı']),
-                            wrapIt('SSKİşçi'),
-                            (\Functional\curry_n(2, 'array_merge'))
-                            ($ay)
-                        )
-                        (min($veriler['girdiler']['SGKTavan'], $ay['brütMaaş']));
-                    }
+                    sskIsci($veriler)
                 )($cikti);
             }
         ]),
@@ -85,15 +91,7 @@ function bruttenNeteHesapla($parametreler, $girdiler)
         applyer([
             'çıktı' => function ($cikti, $veriler) {
                 return arrayMapWrapper(
-                    function ($ay) use ($veriler) {
-                        return \Functional\compose(
-                            multiplyWith($veriler['parametreler']['işsizlikİşçiPrimi']),
-                            wrapIt('işsizlikİşçi'),
-                            (\Functional\curry_n(2, 'array_merge'))
-                            ($ay)
-                        )
-                        (min($veriler['girdiler']['SGKTavan'], $ay['brütMaaş']));
-                    }
+                    issizlikIsci($veriler),
                 )($cikti);
             }
         ]),
@@ -101,123 +99,27 @@ function bruttenNeteHesapla($parametreler, $girdiler)
         applyer([
             'çıktı' => function ($cikti, $veriler) {
                 return arrayMapWrapper(
-                    function ($ay) use ($veriler) {
-                        return \Functional\compose(
-                            function ($ay) {
-                                return \Functional\select_keys($ay, ['brütMaaş', 'SSKİşçi', 'işsizlikİşçi']);
-                            },
-                            arrayReduceWrapper(function ($a, $b) {
-                                return abs((int)$a) - (int)$b;
-                            }),
-                            wrapIt('gelirVergisiMatrahı'),
-                            (\Functional\curry_n(2, 'array_merge'))
-                            ($ay)
-                        )
-                        ($ay);
-                    }
+                    gelirVergisiMatrahi($veriler)
                 )($cikti);
             }
         ]),
         # Kümülatif GV:
         applyer([
-            'çıktı' => function ($cikti, $veriler) {
-                return \Functional\compose(
-                    arrayMapWrapper(
-                        \Functional\compose(
-                            function ($ayNo) use ($cikti) {
-                                return arrayFilterWrapper(function ($ay) use ($ayNo) {
-                                    return $ay['ay'] <= $ayNo;
-                                })
-                                ($cikti);
-                            },
-                            arrayReduceWrapper(function ($toplam, $ay) {
-                                return $toplam + $ay['gelirVergisiMatrahı'];
-                            }, 0),
-                            wrapIt('kümülatifGelirVergisi'),
-                        )
-                    ),
-                    function ($a) {
-                        return array_slice($a, 0, 12);
-                    },
-                    zip($cikti)
-                )
-                (range(0, 11));
-            }
+            'çıktı' => kumulatifGV()
         ]),
         # Gelir Vergisi: (hazır)
         applyer([
-            'çıktı' => function ($cikti, $veriler) {
-                $vergiler_ = \Functional\compose(
-                    arrayMapWrapper(
-                        \Functional\compose(
-                            lookUp('kümülatifGelirVergisi'),
-                            gelirVergisiDilimleri($veriler['parametreler']),
-                            wrapIt('gelirVergisi')
-                        )
-                    ),
-                    \Functional\curry_n(3, 'array_map')
-                    ('array_merge')
-                    ($cikti),
-                )
-                ($cikti);
-
-                return \Functional\compose(
-                    arrayMapWrapper(function ($rangeEnd) use ($vergiler_) {
-                        return \Functional\select_keys($vergiler_, range(max(0, $rangeEnd - 1), $rangeEnd));
-                    }),
-                    arrayMapWrapper(
-                        arrayMapWrapper(lookUp('gelirVergisi'))
-                    ),
-                    arrayMapWrapper(
-                        'array_reverse'
-                    ),
-                    arrayMapWrapper(
-                        arrayReduceWrapper(function ($a, $b) {
-                            return $b - $a;
-                        }, 0)
-                    ),
-                    arrayMapWrapper('abs'),
-                    arrayMapWrapper(wrapIt('gelirVergisi')),
-                    \Functional\curry_n(3, 'array_map')
-                    ('array_merge')
-                    ($cikti),
-                )(range(0, 11));
-            }
+            'çıktı' => gelirVergisi($parametreler)
         ]),
         # AGİ Oran:
         applyer([
             'girdiler' =>
-                wrapItWith('agiOranı')
-                (\Functional\compose(
-                    agiHesapla($parametreler),
-                    lookUp('sonuç')
-                ))
+                agiOran($parametreler)
         ]),
         # AGİ:
         applyer([
-            'çıktı' => function ($cikti, $veriler) {
-                return \Functional\compose(
-                    arrayMapWrapper(
-                        \Functional\compose(
-                            lookUp('brütMaaş'),
-                            function ($brutUcret) use ($veriler) {
-                                return min(
-                                    $brutUcret
-                                    * ($veriler['girdiler']['agiOranı'] / 100)
-                                    * ($veriler['parametreler']['vergiDilimiKısıtları'][0][2] / 100),
-                                    $veriler['parametreler']['brütAsgariÜcret']
-                                    * ($veriler['girdiler']['agiOranı'] / 100)
-                                    * ($veriler['parametreler']['vergiDilimiKısıtları'][0][2] / 100),
-                                );
-                            },
-                            wrapIt('AGİ')
-                        )
-                    ),
-                    \Functional\curry_n(3, 'array_map')
-                    ('array_merge')
-                    ($cikti),
-                )
-                ($cikti);
+            'çıktı' => function($cikti, $veriler){
+                return agiCikti($veriler)($cikti);
             }
         ]),
         # Damga Vergisi:
@@ -225,13 +127,7 @@ function bruttenNeteHesapla($parametreler, $girdiler)
             'çıktı' => function ($cikti, $veriler) {
                 return \Functional\compose(
                     arrayMapWrapper(
-                        \Functional\compose(
-                            lookUp('brütMaaş'),
-                            function ($a) use ($veriler) {
-                                return $a * $veriler['parametreler']['damgaVergisiKatkısı'];
-                            },
-                            wrapIt('damgaVergisi')
-                        )
+                        damgaVergisi($veriler)
                     ),
                     \Functional\curry_n(3, 'array_map')
                     ('array_merge')
@@ -245,27 +141,7 @@ function bruttenNeteHesapla($parametreler, $girdiler)
             'çıktı' => function ($cikti, $veriler) {
                 return \Functional\compose(
                     arrayMapWrapper(
-                        \Functional\compose(
-                            function ($a) {
-                                return \Functional\select_keys($a,
-                                    ['brütMaaş', 'SSKİşçi', 'işsizlikİşçi', 'gelirVergisi', 'AGİ', 'damgaVergisi']);
-                            },
-                            function ($v) {
-                                return
-                                    $v['brütMaaş']
-                                    -
-                                    $v['SSKİşçi']
-                                    -
-                                    $v['işsizlikİşçi']
-                                    -
-                                    $v['gelirVergisi']
-                                    +
-                                    $v['AGİ']
-                                    -
-                                    $v['damgaVergisi'];
-                            },
-                            wrapIt('netÜcret')
-                        )
+                        netUcret()
                     ),
                     \Functional\curry_n(3, 'array_map')
                     ('array_merge')
@@ -279,16 +155,7 @@ function bruttenNeteHesapla($parametreler, $girdiler)
             'çıktı' => function ($cikti, $veriler) {
                 return \Functional\compose(
                     arrayMapWrapper(
-                        \Functional\compose(
-                            lookUp('brütMaaş'),
-                            \Functional\curry_n(2, 'min')
-                            ($veriler['girdiler']['SGKTavan']),
-                            function ($a) use ($veriler) {
-                                return $veriler['parametreler']['SSKİşVerenPrimiOranı']
-                                    / 100 * $a;
-                            },
-                            wrapIt('SSKİşVeren')
-                        )
+                        sskIsveren($veriler)
                     ),
                     \Functional\curry_n(3, 'array_map')
                     ('array_merge')
@@ -302,16 +169,7 @@ function bruttenNeteHesapla($parametreler, $girdiler)
             'çıktı' => function ($cikti, $veriler) {
                 return \Functional\compose(
                     arrayMapWrapper(
-                        \Functional\compose(
-                            lookUp('brütMaaş'),
-                            \Functional\curry_n(2, 'min')
-                            ($veriler['girdiler']['SGKTavan']),
-                            function ($a) use ($veriler) {
-                                return $veriler['parametreler']['işsizlikİşVerenPrimiOranı']
-                                    / 100 * $a;
-                            },
-                            wrapIt('işsizlikİşVeren')
-                        )
+                        issizlikIsveren($veriler)
                     ),
                     \Functional\curry_n(3, 'array_map')
                     ('array_merge')
@@ -325,15 +183,7 @@ function bruttenNeteHesapla($parametreler, $girdiler)
             'çıktı' => function ($cikti, $veriler) {
                 return \Functional\compose(
                     arrayMapWrapper(
-                        \Functional\compose(
-                            function ($v) {
-                                return \Functional\select_keys($v, ['brütMaaş', 'SSKİşVeren', 'işsizlikİşVeren']);
-                            },
-                            arrayReduceWrapper(function ($a, $b) {
-                                return $a + $b;
-                            }, 0),
-                            wrapIt('toplamMaliyet')
-                        )
+                        toplamMaliyet()
                     ),
                     \Functional\curry_n(3, 'array_map')
                     ('array_merge')
@@ -357,9 +207,9 @@ function bruttenNeteHesapla($parametreler, $girdiler)
         ]),
         # Rakamsal Derinlik:
         applyer([
-            'çıktı' => function($cikti){
+            'çıktı' => function ($cikti) {
                 array_walk_recursive($cikti,
-                    function(&$value){
+                    function (&$value) {
                         $value = round($value, 2);
                     }
                 );
