@@ -9,6 +9,7 @@ use function Bordro\Kidem\kidemTazminatiHesapla;
 const KIDEM_TAZMINATI = 'kıdem';
 const IHBAR_TAZMINATI = 'ihbar';
 const BRUTTEN_NETE = 'brütnet';
+const NETTEN_BRUTE = 'netbrüt';
 
 if (!function_exists('Bordro\hesapla')) {
     function hesapla($fn, $parametreler, $girdiler)
@@ -19,6 +20,9 @@ if (!function_exists('Bordro\hesapla')) {
                 break;
             case IHBAR_TAZMINATI:
                 $fn = 'Bordro\Ihbar\ihbarTazminatiHesapla';
+                break;
+            case NETTEN_BRUTE:
+                $fn = 'Bordro\NetBrut\nettenBrutHesapla';
                 break;
             case BRUTTEN_NETE:
             default:

@@ -1,8 +1,5 @@
 <?php
 
-# TODO: Rakamsal kesinlik'ten kurtar, yüzlük bir oranda (virgülden sonra iki hane olacak şekilde rakamları kırp.)
-# TODO: Tüm fonksiyon çıktıları için hesaplamaları kontrol et.
-
 namespace Bordro\BrutNet;
 
 use function Bordro\Alan\apply;

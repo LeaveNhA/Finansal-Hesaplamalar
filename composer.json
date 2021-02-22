@@ -34,6 +34,7 @@
       "src/Bordro/Alan/OrtakHesaplamalar.php",
       "src/Bordro/Alan/AlanHesaplamalar.php",
       "src/Bordro/BrutNet/Main.php",
+      "src/Bordro/NetBrut/Main.php",
       "src/Bordro/Ihbar/Main.php",
       "src/Bordro/Kidem/Main.php"
     ]
