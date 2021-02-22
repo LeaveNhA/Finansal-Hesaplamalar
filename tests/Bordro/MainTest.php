@@ -4,37 +4,41 @@ namespace Bordro\Tests;
 
 use PHPUnit\Framework\TestCase;
 use function Bordro\hesapla;
+use const Bordro\KIDEM_TAZMINATI;
+use const Bordro\BRUTTEN_NETE;
+use const Bordro\IHBAR_TAZMINATI;
+
 
 final class MainTest extends TestCase
 {
-    public function testExpectedResult(): void
-    {
-        $parametreler = [
-            'damgaVergisiKatsayısı' => 232.86,
-            'kıdemTazminatıTavan' => 7638.69,
-            'damgaVergisiKatkısı' => 0.00759,
-            #------------------------------------oranlar tam sayı olarak yazılmıştır-------------------------------
-            'ihbarSüresiKısıtları' => [['>', 180, 14], ['>', 540, 28], ['>', 1080, 42], ['<', 1080, 56]],
-            'vergiDilimiKısıtları' =>
-                [[0, 24000, 15],
-                    [24000, 53000, 20],
-                    [53000, 190000, 27],
-                    [190000, 650000, 35],
-                    [650000, 99999999999999, 40]],
-            #------------------------------------------------------------------------------------------------------
-            'ilkİkiÇocukOranı' => 7.5,
-            'üçüncüÇocukOranı' => 10,
-            'dördüncüÇocukVeSonrasıOranı' => 5,
-            'asgariÜcret' => 2825.90,
-            'brütAsgariÜcret' => 3577, 5,
-            'SGKTavanOranı' => 7.5,
-            'SSKİşVerenPrimiOranı' => 15.5,
-            'SSKİşçiPrimiOranı' => 0.14,
-            'SSKİşsizlikİşçiPrimi' => 0.01,
-            'işsizlikİşçiPrimi' => 0.01,
-            'işsizlikİşVerenPrimiOranı' => 2
-        ];
+    protected $parametreler = [
+        'damgaVergisiKatsayısı' => 232.86,
+        'kıdemTazminatıTavan' => 7638.69,
+        'damgaVergisiKatkısı' => 0.00759,
+        #------------------------------------oranlar tam sayı olarak yazılmıştır-------------------------------
+        'ihbarSüresiKısıtları' => [['>', 180, 14], ['>', 540, 28], ['>', 1080, 42], ['<', 1080, 56]],
+        'vergiDilimiKısıtları' =>
+            [[0, 24000, 15],
+                [24000, 53000, 20],
+                [53000, 190000, 27],
+                [190000, 650000, 35],
+                [650000, 99999999999999, 40]],
+        #------------------------------------------------------------------------------------------------------
+        'ilkİkiÇocukOranı' => 7.5,
+        'üçüncüÇocukOranı' => 10,
+        'dördüncüÇocukVeSonrasıOranı' => 5,
+        'asgariÜcret' => 2825.90,
+        'brütAsgariÜcret' => 3577, 5,
+        'SGKTavanOranı' => 7.5,
+        'SSKİşVerenPrimiOranı' => 15.5,
+        'SSKİşçiPrimiOranı' => 0.14,
+        'SSKİşsizlikİşçiPrimi' => 0.01,
+        'işsizlikİşçiPrimi' => 0.01,
+        'işsizlikİşVerenPrimiOranı' => 2
+    ];
 
+    public function testExpectedResultOfIhbar(): void
+    {
         $girdilerIhbar = [
             'adSoyad' => 'Seçkin KÜKRER',
             'sskNo' => '???',
@@ -44,11 +48,21 @@ final class MainTest extends TestCase
             'kümülatifGelirVergisiMatrahı' => 56000
         ];
 
-        $parametrelerKidem = [
-            'damgaVergisiKatsayısı' => 232.86,
-            'kıdemTazminatıTavan' => 7638.69,
-            'damgaVergisiKatkısı' => 0.00759
+        $beklenenCikti = [
+            'çalıştığıGünSayısı' => 1828,
+            'ihbarSüresiGünü' => 56,
+            'brütİhbarTazminatı' => 28000,
+            'damgaVergisi' => 212.52,
+            'gelirVergisi' => 7560,
+            'netİhbarTazminatı' => 20227.48,
         ];
+
+        $this->assertEquals(hesapla(IHBAR_TAZMINATI, $this->parametreler, $girdilerIhbar)['çıktı'], $beklenenCikti, 'Bordro Kıdem hesaplaması temel testi.');
+    }
+
+    public function testExpectedResultOfKidem(): void
+    {
+
         $girdilerKidem = [
             'adSoyad' => 'Seçkin KÜKRER',
             'işeGiriş' => "2016-01-01",
@@ -57,6 +71,17 @@ final class MainTest extends TestCase
             'ekÖdemeÜcret' => 0
         ];
 
+        $beklenenCikti = [
+            'brütKıdemTazminatı' => 30575.68791780822,
+            'damgaVergisi' => 232.0694712961644,
+            'netKıdemTazminatı' => 30343.618446512057,
+        ];
+
+        $this->assertEquals(hesapla(KIDEM_TAZMINATI, $this->parametreler, $girdilerKidem)['çıktı'], $beklenenCikti, 'Bordro Kıdem hesaplaması temel testi.');
+    }
+
+    public function testExpectedResultOfBrutNet(): void
+    {
         $agiGirdiler = ['medeniDurum' => 'evli', 'eşininÇalışmaDurumu' => 'çalışmıyor', 'çocukSayısı' => 4];
         $brutNetGirdi = array_merge(['aylıkBrütÜcret' => 7133.77], $agiGirdiler);
 
@@ -258,6 +283,6 @@ final class MainTest extends TestCase
             ]
         ];
 
-        $this->assertEquals(hesapla('brütnet', $parametreler, $brutNetGirdi)['çıktı'], $beklenenCikti, 'Bordro Kıdem hesaplaması temel testi.');
+        $this->assertEquals(hesapla(BRUTTEN_NETE, $this->parametreler, $brutNetGirdi)['çıktı'], $beklenenCikti, 'Bordro Brüt-Net hesaplaması temel testi.');
     }
 }
