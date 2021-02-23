@@ -4,6 +4,9 @@
   "type": "library",
   "description": "Calculate some financials with some parameters.",
   "keywords": [
+    "Brütten Nete Maaş Hesaplama",
+    "Netten Brüte Maaş Hesaplama",
+    "İhbar Tazminatı Hesaplama",
     "Kıdem Tazminatı Hesaplama"
   ],
   "homepage": "https://github.com/LeaveNhA/INOPSIS-Hesaplamalar",
