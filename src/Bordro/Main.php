@@ -5,10 +5,6 @@
 
 namespace Bordro;
 
-use function Bordro\BrutNet\bruttenNeteHesapla;
-use function Bordro\Ihbar\ihbarTazminatiHesapla;
-use function Bordro\Kidem\kidemTazminatiHesapla;
-
 const KIDEM_TAZMINATI = 'kıdem';
 const IHBAR_TAZMINATI = 'ihbar';
 const BRUTTEN_NETE = 'brütnet';
