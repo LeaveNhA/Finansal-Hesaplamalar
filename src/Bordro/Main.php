@@ -1,5 +1,8 @@
 <?php
 
+# Tüm modüller için hesaplama derinliğini çözümle!
+# Kıdem'de bir yıl altında hesaplanıyorsa, kıdem alamaz.
+
 namespace Bordro;
 
 use function Bordro\BrutNet\bruttenNeteHesapla;

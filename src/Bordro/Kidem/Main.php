@@ -83,7 +83,19 @@ function kidemTazminatiHesapla($parametreler, $girdiler)
             $veriler['çıktı'] = \Functional\select_keys($veriler['girdiler'], ['çalıştığıGün', 'brütKıdemTazminatı', 'damgaVergisi', 'netKıdemTazminatı']);
 
             return $veriler;
-        }
+        },
+        # Rakamsal Derinlik:
+        applyer([
+            'çıktı' => function ($cikti) {
+                array_walk_recursive($cikti,
+                    function (&$value) {
+                        $value = round($value, 2);
+                    }
+                );
+
+                return $cikti;
+            }
+        ])
     )
     (['parametreler' => $parametreler,
         'girdiler' => $girdiler]);
