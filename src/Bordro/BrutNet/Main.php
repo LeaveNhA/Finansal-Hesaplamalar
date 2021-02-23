@@ -69,7 +69,8 @@ function bruttenNeteHesapla($parametreler, $girdiler)
         applyer([
             'girdiler' => function ($girdiler, $veriler) {
                 $girdiler['SGKTavan'] =
-                    $veriler['parametreler']['asgariÜcret']
+                    # TODO: gerçekten brüt asgari ücretten mi, iş mantığını doğrula!
+                    $veriler['parametreler']['brütAsgariÜcret']
                     *
                     $veriler['parametreler']['SGKTavanOranı'];
 
