@@ -1,25 +1,47 @@
 <?php
+
 namespace Bordro\Alan;
 
 # Essential functions for FP.
 
 use function Functional\compose;
 
+function iterate($iterateFn)
+{
+    return function ($stopFn, $stopCount = 100) use ($iterateFn) {
+        $fn_ = (new class {
+            function __invoke($value, $stopCount, $iterateFn, $stopFn) {
+                return ($stopCount < 0 || $stopCount === 0) || ($stopFn($value) === true) ? $value : $this($iterateFn($value), $stopCount - 1, $iterateFn, $stopFn);
+            }
+        });
+
+        return function($value) use ($stopCount, $stopFn, $iterateFn, $fn_) {
+            return $fn_($value, $stopCount, $iterateFn, $stopFn);
+        };
+    };
+}
+
 function identity($a)
 {
     return $a;
 }
 
-function apply($fn){
-    return function($i) use ($fn) {
+function id($a){
+    return $a;
+}
+
+function apply($fn)
+{
+    return function ($i) use ($fn) {
         $fn($i);
         return $i;
     };
 }
 
-function wrapItWith($key){
-    return function($fn) use ($key) {
-        return function($value) use ($key, $fn) {
+function wrapItWith($key)
+{
+    return function ($fn) use ($key) {
+        return function ($value) use ($key, $fn) {
             $value[$key] = $fn($value);
 
             return $value;
@@ -27,32 +49,37 @@ function wrapItWith($key){
     };
 }
 
-function multiplyWith($a){
-    return function($b) use ($a) {
+function multiplyWith($a)
+{
+    return function ($b) use ($a) {
         return $a * $b;
     };
 }
 
-function zip($arr_){
-    return function($arr2_) use ($arr_) {
+function zip($arr_)
+{
+    return function ($arr2_) use ($arr_) {
         return array_map('array_merge', $arr_, $arr2_);
     };
 }
 
-function lookUp($key){
-    return function($value) use($key){
+function lookUp($key)
+{
+    return function ($value) use ($key) {
         return $value[$key];
     };
 }
 
-function wrapIt($key){
-    return function($value) use($key){
+function wrapIt($key)
+{
+    return function ($value) use ($key) {
         return [$key => $value];
     };
 }
 
-function mergeWith($fn){
-    return function($arr1, $arr2) use ($fn) {
+function mergeWith($fn)
+{
+    return function ($arr1, $arr2) use ($fn) {
         $result = [];
 
         foreach ($arr1 as $k => $v)
@@ -216,7 +243,7 @@ function ihbarSuresiHesaplama($parametreler)
     return function ($girdiler) use ($parametreler) {
         $girdiler['ihbarSüresiGünü'] = \Functional\compose(
             arrayMapWrapper(
-                function($a){
+                function ($a) {
                     return karsilastirmaFonksiyonuDonusumleri($a);
                 }
             ),
@@ -226,7 +253,9 @@ function ihbarSuresiHesaplama($parametreler)
                 }
             ),
             # identity placeholder for some strange PHP bug.
-            arrayFilterWrapper(function ($a){return $a;}),
+            arrayFilterWrapper(function ($a) {
+                return $a;
+            }),
             'array_values',
             function ($array) {
                 return $array[0];
@@ -257,10 +286,10 @@ function agiCocukSayisi($parametreler)
     $ucuncuCocukOrani = $parametreler['üçüncüÇocukOranı'];
     $dortVeSonrasiOrani = $parametreler['dördüncüÇocukVeSonrasıOranı'];
 
-    return function ($veriler) use($ilkIkiCocukOrani, $ucuncuCocukOrani, $dortVeSonrasiOrani) {
+    return function ($veriler) use ($ilkIkiCocukOrani, $ucuncuCocukOrani, $dortVeSonrasiOrani) {
         $m = $veriler['çocukSayısı'];
 
-        switch ($m){
+        switch ($m) {
             case 1:
                 return $ilkIkiCocukOrani;
             case 2:
@@ -279,26 +308,26 @@ function agiHesapla($parametreler)
 {
     return function ($agiVerileri) use ($parametreler) {
         return \Functional\compose(
-            # Kendi için:
-            function ($veriler){
+        # Kendi için:
+            function ($veriler) {
                 $veriler['sonuç'] = 50;
 
                 return $veriler;
             },
             # Eş çalışma durumu:
-            function($veriler) use($parametreler){
+            function ($veriler) use ($parametreler) {
                 $veriler['sonuç'] += agiEsDurumu($parametreler)($veriler);
 
                 return $veriler;
             },
             # Çocuklar için:
-            function($veriler) use($parametreler){
+            function ($veriler) use ($parametreler) {
                 $veriler['sonuç'] += agiCocukSayisi($parametreler)($veriler);
 
                 return $veriler;
             },
             applyer([
-                'sonuç' => function($n){
+                'sonuç' => function ($n) {
                     return min($n, 85);
                 }
             ])
@@ -307,8 +336,9 @@ function agiHesapla($parametreler)
     };
 }
 
-function vergiDilimiIslemi($deger){
-    return function($vergiDilimi) use ($deger) {
+function vergiDilimiIslemi($deger)
+{
+    return function ($vergiDilimi) use ($deger) {
         list($baslangicKisit, $bitisKisit, $oran) = $vergiDilimi;
         return array_merge(
             $vergiDilimi,
@@ -327,7 +357,9 @@ function gelirVergisiDilimleri($parametreler)
         return \Functional\compose(
             arrayMapWrapper(vergiDilimiIslemi($deger)),
             arrayMapWrapper('\Functional\last'),
-            arrayReduceWrapper(function($a, $b){ return $a + $b; })
+            arrayReduceWrapper(function ($a, $b) {
+                return $a + $b;
+            })
         )
         ($kisitlar);
     };

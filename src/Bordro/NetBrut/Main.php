@@ -9,6 +9,7 @@ use function Bordro\Alan\arrayReduceWrapper;
 use function Bordro\Alan\arrayFilterWrapper;
 use function Bordro\Alan\Is\agiCikti;
 use function Bordro\Alan\Is\agiOran;
+use function Bordro\Alan\Is\brutIlkleyici;
 use function Bordro\Alan\Is\brutMaas;
 use function Bordro\Alan\Is\damgaVergisi;
 use function Bordro\Alan\Is\gelirVergisi;
@@ -34,8 +35,40 @@ use function Functional\compose;
 function nettenBrutHesapla($parametreler, $girdiler)
 {
 
+    $aylar = [[]];
+    # veri ata, sonrasında hesaplanacak beş değeri al ve bu değere tekrar ata, hesaplanan değerleri tekrar hesapla ve yakınlık çıkana kadar tekrar et!
 
-    if(false)
+    # Eşitlik sağlamak için:
+    $ayHesapla = function ($veriler) {
+        return function ($ayNo) use ($veriler) {
+            return \Functional\compose(
+            # Brüt İlkleme:
+            function($aylar) use ($ayNo) {
+                return applyer([$ayNo =>
+                    brutIlkleyici(1.398777468492538)
+                ])
+                ($aylar);
+            },
+            # SSK İşçi:
+            function($aylar) use ($veriler, $ayNo) {
+                return applyer([
+                    $ayNo =>
+                    sskIsci($veriler)
+                ])
+                ($aylar);
+            },
+            # İşsizlik İşçi:
+            function($aylar){
+            },
+            # GV Matrahı:
+            # Kümülatif GV (tüm veri):
+            # Gelir Vergisi:
+            # Damga Vergisi:
+            );
+        };
+    };
+
+
     return compose(
     # Aylık Dilimler:
         applyer([
@@ -60,6 +93,21 @@ function nettenBrutHesapla($parametreler, $girdiler)
                 ) ($cikti);
             }
         ]),
+        applyer([
+            'girdiler' => function ($girdiler, $veriler) {
+                $girdiler['SGKTavan'] =
+                    $veriler['parametreler']['asgariÜcret']
+                    *
+                    $veriler['parametreler']['SGKTavanOranı'];
+
+                return $girdiler;
+            }
+        ]),
+        applyer([
+            'çıktı' => function($cikti, $veriler) use ($ayHesapla) {
+                return $ayHesapla($veriler)(0)($cikti);
+            }
+        ])
     )
     (['parametreler' => $parametreler,
         'girdiler' => $girdiler,

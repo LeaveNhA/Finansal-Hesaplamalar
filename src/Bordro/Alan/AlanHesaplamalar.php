@@ -4,6 +4,7 @@ namespace Bordro\Alan\Is;
 
 use function Bordro\Alan\agiHesapla;
 use function Bordro\Alan\apply;
+use function Bordro\Alan\applyer;
 use function Bordro\Alan\arrayFilterWrapper;
 use function Bordro\Alan\arrayMapWrapper;
 use function Bordro\Alan\arrayReduceWrapper;
@@ -13,6 +14,18 @@ use function Bordro\Alan\multiplyWith;
 use function Bordro\Alan\wrapIt;
 use function Bordro\Alan\wrapItWith;
 use function Bordro\Alan\zip;
+
+function brutIlkleyici($carpan){
+    return function($ay) use ($carpan) {
+        return \Functional\compose(
+            lookUp('netÜcret'),
+            multiplyWith($carpan),
+            wrapIt('brütÜcret'),
+            (\Functional\curry_n(2, 'array_merge'))
+            ($ay)
+        )($ay);
+    };
+}
 
 function sskIsci($veriler)
 {

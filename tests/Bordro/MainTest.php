@@ -7,10 +7,15 @@ use function Bordro\hesapla;
 use const Bordro\KIDEM_TAZMINATI;
 use const Bordro\BRUTTEN_NETE;
 use const Bordro\IHBAR_TAZMINATI;
+use const Bordro\NETTEN_BRUTE;
+
+use function Bordro\Alan\iterate;
 
 
 final class MainTest extends TestCase
 {
+    protected $agiGirdiler =
+        ['medeniDurum' => 'evli', 'eşininÇalışmaDurumu' => 'çalışmıyor', 'çocukSayısı' => 4];
     protected $parametreler = [
         'damgaVergisiKatsayısı' => 232.86,
         'kıdemTazminatıTavan' => 7638.69,
@@ -36,6 +41,21 @@ final class MainTest extends TestCase
         'işsizlikİşçiPrimi' => 0.01,
         'işsizlikİşVerenPrimiOranı' => 2
     ];
+
+    public function testIterateFn(): void
+    {
+        $this->assertEquals(
+            iterate(function ($i) {
+                return $i + 1;
+            })
+            (function ($v) {
+                return $v >= 50;
+            })
+            (0),
+            50,
+            'Iterate Test Call!'
+        );
+    }
 
     public function testExpectedResultOfIhbar(): void
     {
@@ -82,8 +102,7 @@ final class MainTest extends TestCase
 
     public function testExpectedResultOfBrutNet(): void
     {
-        $agiGirdiler = ['medeniDurum' => 'evli', 'eşininÇalışmaDurumu' => 'çalışmıyor', 'çocukSayısı' => 4];
-        $brutNetGirdi = array_merge(['aylıkBrütÜcret' => 7133.77], $agiGirdiler);
+        $brutNetGirdi = array_merge(['aylıkBrütÜcret' => 7133.77], $this->agiGirdiler);
 
         $beklenenCikti = [
             [
@@ -284,5 +303,12 @@ final class MainTest extends TestCase
         ];
 
         $this->assertEquals(hesapla(BRUTTEN_NETE, $this->parametreler, $brutNetGirdi)['çıktı'], $beklenenCikti, 'Bordro Brüt-Net hesaplaması temel testi.');
+    }
+
+    public function testExpectedResultOfNettenBrut(): void
+    {
+        $netBrutGirdi = array_merge(['aylıkNetÜcret' => 10000], $this->agiGirdiler);
+
+        $this->assertTrue(hesapla(NETTEN_BRUTE, $this->parametreler, $netBrutGirdi));
     }
 }
