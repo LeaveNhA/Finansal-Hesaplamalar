@@ -6,6 +6,20 @@ namespace Bordro\Alan;
 
 use function Functional\compose;
 
+function mergeIt($m){
+    return \Functional\curry_n(3, 'array_map')
+    ('array_merge')
+    (m);
+}
+
+function inRange($a){
+    return function($b) use ($a) {
+        return function($v) use ($b, $a) {
+            return ($v >= $a && $v <= $b);
+        };
+    };
+}
+
 function iterate($iterateFn)
 {
     return function ($stopFn, $stopCount = 100) use ($iterateFn) {
@@ -205,8 +219,8 @@ function vergiDilimiHesaplariDonusumleri($degerYapisi, $kisit)
     $kisitDegeri = $kisit[0];
     $kisitOrani = $kisit[1];
 
-    $kisitOranSonucu = $deger <= 0 ? 0 : $deger - $kisitDegeri >= 0 ? $kisitDegeri : $deger;
-    $yeniDeger = $deger <= 0 ? 0 : $deger >= $kisitDegeri ? ($deger - $kisitDegeri) : 0;
+    $kisitOranSonucu = $deger <= 0 ? 0 : ($deger - $kisitDegeri >= 0 ? $kisitDegeri : $deger);
+    $yeniDeger = $deger <= 0 ? 0 : ($deger >= $kisitDegeri ? ($deger - $kisitDegeri) : 0);
     $sonuc = array_merge($kisit, [$kisitOranSonucu / 100 * $kisitOrani]);
 
     # var_dump([$deger, $kisitDegeri, $yeniDeger, $kisitOranSonucu, $sonuc]);

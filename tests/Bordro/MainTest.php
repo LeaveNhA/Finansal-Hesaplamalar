@@ -55,6 +55,25 @@ final class MainTest extends TestCase
             50,
             'Iterate Test Call!'
         );
+
+        $this->assertEquals(
+            array_reduce([0, 0, 0, 0],
+                function ($acc, $v) {
+                    return
+                        $acc
+                        +
+                        iterate(function ($i) {
+                            return $i + 1;
+                        })
+                        (function ($v) {
+                            return $v >= 50;
+                        })
+                        ($v);
+                }
+            ),
+            200,
+            'Array reduce with iteration test call!'
+        );
     }
 
     public function testExpectedResultOfIhbar(): void
@@ -307,8 +326,9 @@ final class MainTest extends TestCase
 
     public function testExpectedResultOfNettenBrut(): void
     {
-        $netBrutGirdi = array_merge(['aylıkNetÜcret' => 10000], $this->agiGirdiler);
+        $netBrutGirdi = array_merge(['aylıkNetMaaş' => 10000], $this->agiGirdiler);
 
-        $this->assertTrue(hesapla(NETTEN_BRUTE, $this->parametreler, $netBrutGirdi));
+        # TODO: Beklenen değerleri belirle ve bir test gerçekle.
+        #$this->assertTrue(hesapla(NETTEN_BRUTE, $this->parametreler, $netBrutGirdi));
     }
 }
