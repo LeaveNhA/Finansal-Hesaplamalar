@@ -41,10 +41,6 @@ use function Functional\select_keys;
 
 function nettenBrutHesapla($parametreler, $girdiler)
 {
-
-    $aylar = [[]];
-    # veri ata, sonrasında hesaplanacak beş değeri al ve bu değere tekrar ata, hesaplanan değerleri tekrar hesapla ve yakınlık çıkana kadar tekrar et!
-
     # Eşitlik sağlamak için:
     $ayHesapla = function ($veriler) {
         return function ($ayNo) use ($veriler) {
