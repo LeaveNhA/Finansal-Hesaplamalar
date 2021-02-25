@@ -22,6 +22,7 @@ use function Bordro\Alan\Is\issizlikIsci;
 use function Bordro\Alan\Is\issizlikIsveren;
 use function Bordro\Alan\Is\kumulatifGV;
 use function Bordro\Alan\Is\netUcret;
+use function Bordro\Alan\Is\SGKTavan;
 use function Bordro\Alan\Is\sskIsci;
 use function Bordro\Alan\Is\sskIsveren;
 use function Bordro\Alan\Is\toplamEleGecen;
@@ -114,14 +115,7 @@ function nettenBrutHesapla($parametreler, $girdiler)
             }
         ]),
         applyer([
-            'girdiler' => function ($girdiler, $veriler) {
-                $girdiler['SGKTavan'] =
-                    $veriler['parametreler']['asgariÜcret']
-                    *
-                    $veriler['parametreler']['SGKTavanOranı'];
-
-                return $girdiler;
-            }
+            'girdiler' => 'Bordro\Alan\Is\SGKTavan'
         ]),
         # Brüt ilkleyici:
         applyer([
@@ -134,19 +128,24 @@ function nettenBrutHesapla($parametreler, $girdiler)
                 return iterate(
                     $ayHesapla($veriler)($ayNo)
                 )
-                (function ($aylar) use ($ayNo) {
+                (function ($aylar) use ($veriler, $ayNo) {
                     $a_ = array_key_exists('brütMaaş', $aylar[$ayNo]) ? $aylar[$ayNo]['brütMaaş'] : false;
                     $brut_ = brut()($aylar[$ayNo]);
                     $b_ = array_key_exists('brütMaaş', $brut_) ? $brut_['brütMaaş'] : false;
+
+                    if($ayNo == 2)
+                        null;
+
+                    $veriler;
 
                     if($a_ === false || $b_ === false)
                         return false;
 
                     $diff_ = abs($a_ - $b_);
-                    $result_ = inRange(0)(0.1)
+                    $result_ = inRange(0)(0.01)
                     ($diff_);
                     return $result_;
-                })
+                }, 20000)
                 ($cikti);
             }, $veriler['çıktı'])
             (range(0, count($veriler['çıktı']) - 1));

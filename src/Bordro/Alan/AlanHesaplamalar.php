@@ -11,6 +11,7 @@ use function Bordro\Alan\arrayReduceWrapper;
 use function Bordro\Alan\gelirVergisiDilimleri;
 use function Bordro\Alan\lookUp;
 use function Bordro\Alan\multiplyWith;
+use function Bordro\Alan\roundIt;
 use function Bordro\Alan\wrapIt;
 use function Bordro\Alan\wrapItWith;
 use function Bordro\Alan\zip;
@@ -40,7 +41,10 @@ function sskIsci($veriler)
             (\Functional\curry_n(2, 'array_merge'))
             ($ay)
         )
-        (min($veriler['girdiler']['SGKTavan'], $ay['brütMaaş']));
+        (min(array_key_exists('SGKTavan', $veriler['girdiler']) ? $veriler['girdiler']['SGKTavan']
+            :
+            ((SGKTavan($veriler['girdiler'], $veriler)['SGKTavan']) ?: 0),
+            $ay['brütMaaş']));
     };
 }
 
@@ -53,7 +57,10 @@ function issizlikIsci($veriler)
             (\Functional\curry_n(2, 'array_merge'))
             ($ay)
         )
-        (min($veriler['girdiler']['SGKTavan'], $ay['brütMaaş']));
+        (min(array_key_exists('SGKTavan', $veriler['girdiler']) ? $veriler['girdiler']['SGKTavan']
+            :
+            ((SGKTavan($veriler['girdiler'], $veriler)['SGKTavan']) ?: 0),
+            $ay['brütMaaş']));
     };
 }
 
@@ -61,12 +68,14 @@ function gelirVergisiMatrahi($veriler)
 {
     return function ($ay) {
         return \Functional\compose(
-            function ($ay) {
-                return \Functional\select_keys($ay, ['brütMaaş', 'SSKİşçi', 'işsizlikİşçi']);
+            function($degerler){
+                return $degerler['brütMaaş']
+                    -
+                    $degerler['SSKİşçi']
+                    -
+                    $degerler['işsizlikİşçi'];
             },
-            arrayReduceWrapper(function ($a, $b) {
-                return abs((int)$a) - (int)$b;
-            }),
+            roundIt(2),
             wrapIt('gelirVergisiMatrahı'),
             (\Functional\curry_n(2, 'array_merge'))
             ($ay)
@@ -138,6 +147,7 @@ function gelirVergisi($parametreler)
                 }, 0)
             ),
             arrayMapWrapper('abs'),
+            arrayMapWrapper(roundIt(2)),
             arrayMapWrapper(wrapIt('gelirVergisi')),
             \Functional\curry_n(3, 'array_map')
             ('array_merge')
@@ -270,11 +280,9 @@ function brut()
         });
 
         $hepsiNumerikMi ?
-                $ay['brütMaaş'] = arrayReduceWrapper(function ($a, $b) {
-                    return $a + $b;
-                })($veriler_)
+                $ay['brütMaaş'] = array_reduce($veriler_, function($a, $b){ return $a + $b; })
             :
-            $ay;
+            null;
 
         return $ay;
     };
@@ -290,4 +298,13 @@ function toplamEleGecen()
         }, 0),
         wrapIt('toplamEleGeçen')
     );
+}
+
+function SGKTavan($girdiler, $veriler) {
+    $girdiler['SGKTavan'] =
+        $veriler['parametreler']['brütAsgariÜcret']
+        *
+        $veriler['parametreler']['SGKTavanOranı'];
+
+    return $girdiler;
 }

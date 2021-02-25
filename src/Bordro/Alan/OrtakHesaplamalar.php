@@ -6,6 +6,12 @@ namespace Bordro\Alan;
 
 use function Functional\compose;
 
+function roundIt($p){
+    return function($v) use ($p) {
+        return round($v, $p);
+    };
+}
+
 function mergeIt($m){
     return \Functional\curry_n(3, 'array_map')
     ('array_merge')
