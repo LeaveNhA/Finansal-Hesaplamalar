@@ -67,15 +67,7 @@ function bruttenNeteHesapla($parametreler, $girdiler)
         ]),
         # SGK Tavan:
         applyer([
-            'girdiler' => function ($girdiler, $veriler) {
-                $girdiler['SGKTavan'] =
-                    # TODO: gerçekten brüt asgari ücretten mi, iş mantığını doğrula!
-                    $veriler['parametreler']['brütAsgariÜcret']
-                    *
-                    $veriler['parametreler']['SGKTavanOranı'];
-
-                return $girdiler;
-            }
+            'girdiler' => 'Bordro\Alan\Is\SGKTavan'
         ]),
         # SSK İşçi:
         applyer([
