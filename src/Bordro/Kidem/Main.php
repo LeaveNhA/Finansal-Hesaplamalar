@@ -38,6 +38,11 @@ function kidemTazminatiHesapla($parametreler, $girdiler)
         return new \DateTime($a);
     };
 
+    $calistigiGunKisit = function($gun){
+        if($gun < 366)
+            throw new \Exception('Kıdem tazminatı için gerekli çalışma süresi, kesintisiz en az bir yıldır!');
+    };
+
     return \Functional\compose(
     # Girdiyi yapılandır!
         applyer([
@@ -58,6 +63,11 @@ function kidemTazminatiHesapla($parametreler, $girdiler)
         # Çalıştığı Gün Sayısı:
         applyer([
             'girdiler' => 'Bordro\Alan\calistigiGunHesapla'
+        ]),
+        applyer([
+            'girdiler' => applyer([
+                'çalıştığıGünSayısı' => apply($calistigiGunKisit)
+            ])
         ]),
         # Brüt Kıdem Tazminat:
         function ($veriler) {
