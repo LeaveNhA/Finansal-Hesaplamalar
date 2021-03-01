@@ -15,6 +15,7 @@ use function Bordro\Alan\Is\gelirVergisiDilimle;
 use function Bordro\Alan\Is\gelirVergisiMatrahi;
 use function Bordro\Alan\Is\issizlikIsci;
 use function Bordro\Alan\Is\issizlikIsveren;
+use function Bordro\Alan\Is\kidemTazminatTavan;
 use function Bordro\Alan\Is\kumulatifGV;
 use function Bordro\Alan\Is\netUcret;
 use function Bordro\Alan\Is\sskIsci;
@@ -60,7 +61,10 @@ function kidemTazminatiHesapla($parametreler, $girdiler)
         ]),
         # Brüt Kıdem Tazminat:
         function ($veriler) {
-            $temelCarpan = min($veriler['parametreler']['kıdemTazminatıTavan'], $veriler['girdiler']['toplamBrütÜcret']);
+            $kidemTazminatTavan = kidemTazminatTavan($veriler['parametreler'])
+            ($veriler['girdiler']['iştenÇıkış']->format('Y'))
+            (intval($veriler['girdiler']['iştenÇıkış']->format('n') < 7 ? 0 : 1));
+            $temelCarpan = min($kidemTazminatTavan, $veriler['girdiler']['toplamBrütÜcret']);
 
             $veriler['girdiler']['brütKıdemTazminatı'] = $temelCarpan * $veriler['girdiler']['çalıştığıGünSayısı'] / 365;
 

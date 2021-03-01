@@ -68,7 +68,7 @@ function gelirVergisiMatrahi($veriler)
 {
     return function ($ay) {
         return \Functional\compose(
-            function($degerler){
+            function ($degerler) {
                 return $degerler['brütMaaş']
                     -
                     $degerler['SSKİşçi']
@@ -280,13 +280,16 @@ function brut()
         });
 
         $hepsiNumerikMi ?
-                $ay['brütMaaş'] = array_reduce($veriler_, function($a, $b){ return $a + $b; })
+            $ay['brütMaaş'] = array_reduce($veriler_, function ($a, $b) {
+                return $a + $b;
+            })
             :
             null;
 
         return $ay;
     };
 }
+
 function toplamEleGecen()
 {
     return \Functional\compose(
@@ -300,11 +303,28 @@ function toplamEleGecen()
     );
 }
 
-function SGKTavan($girdiler, $veriler) {
+function SGKTavan($girdiler, $veriler)
+{
     $girdiler['SGKTavan'] =
         $veriler['parametreler']['brütAsgariÜcret']
         *
         $veriler['parametreler']['SGKTavanOranı'];
 
     return $girdiler;
+}
+
+function kidemTazminatTavan($parametreler)
+{
+    return function ($yil) use ($parametreler) {
+        return function ($yildilimi) use ($parametreler, $yil) {
+            return array_key_exists($yil, $parametreler['kıdemTazminatıOranları']) ?
+                (array_key_exists($yildilimi, $parametreler['kıdemTazminatıOranları'][$yil]) ?
+                    $parametreler['kıdemTazminatıOranları'][$yil][$yildilimi]
+                    :
+                    0
+                )
+                :
+                0;
+        };
+    };
 }
